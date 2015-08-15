@@ -49,7 +49,8 @@ gem 'kaminari'
 gem 'ffaker'
 gem 'httparty'
 gem 'savon', '~> 2.10.0'
-# gem 'sprockets', '~> 3.0'
+gem 'delayed_job_active_record'
+gem 'newrelic_rpm'
 source 'https://rails-assets.org' do
   gem 'rails-assets-bootstrap'
 end
