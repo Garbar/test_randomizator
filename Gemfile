@@ -51,6 +51,8 @@ gem 'httparty'
 gem 'savon', '~> 2.10.0'
 gem 'delayed_job_active_record'
 gem 'newrelic_rpm'
+gem 'russian_mutators', github: 'Paxa/russian_mutators'
+gem 'russian_inflect'
 source 'https://rails-assets.org' do
   gem 'rails-assets-bootstrap'
 end

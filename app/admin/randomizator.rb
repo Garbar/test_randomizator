@@ -27,6 +27,7 @@ ActiveAdmin.register Randomizator do
   member_action :publish, method: 'post' do
     randomizator = Randomizator.find(params[:id])
     randomizator.delay.create_articles
+    # randomizator.create_articles
     redirect_to admin_randomizator_path(randomizator), notice: 'Articles has been create successfully!'
   end
 end
