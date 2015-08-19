@@ -11,14 +11,22 @@ ActiveAdmin.register Randomizator do
   end
   form do |f|
     f.inputs "Рандомизатор" do
-      f.input :site, :label => "Сайт"
+      # f.semantic_errors *f.object.errors.keys
+      f.semantic_errors :base
       f.input :title, :label => "Название"
-      f.input :text, :label => 'Текст'
+      f.input :site, :label => "Сайт"
+      f.input :wheretext, :label => "Действия с текстом",
+        :as => :select,
+        :include_blank => "Только сохранить текст",
+        :collection =>{'Преобразовать текст в новом поле' => 'new_text'}
+      f.input :text, :label => 'Текст для преобразования', :hint => 'Синонимы берутся с Яндекс словарей'
+      f.input :stext, :label => 'Текст для преобразования', :hint => 'Синонимы добавляются пользователей  в виде массива возможжных вариантов'
+      f.input :newtext, :label => 'Текст после замены слов'
     end
     f.actions
   end
   permit_params :title,
-    :text,  :site_id
+    :text,  :site_id, :wheretext, :stext, :newtext
 
   action_item only: :show do
     link_to 'Create articles', publish_admin_randomizator_path(randomizator), :method => :post

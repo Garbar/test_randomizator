@@ -1,15 +1,41 @@
 class Randomizator < ActiveRecord::Base
   include HTTParty
   belongs_to :site
-  def create_articles
-    # City.all.each do |c|
-    #   # result = self.text.gsub(/\{(.*?)\}/){random_word($1)}
-    #   result = self.text.gsub(/\{\[(.*?)\](\[(.*?)\])*\}/){random_word($1, $3)}
-    #   @article = Article.create!({title: self.title, text: result, description: result.truncate_words(20), city_id: c.id, site_id:self.site_id, url: self.title.parameterize })
-    # end
+  before_save :generate_new_text
+  validates :title, presence: true
+  validates :site_id, presence: true
+  # validates :text, presence: true, :unless => proc{|obj| obj.text.blank?}
+  # validates :stext, presence: true, :unless => proc{|obj| obj.stext.blank?}
 
-    result = self.text.gsub(/\{\[(.*?)\](\[(.*?)\])*\}/){random_word($1, $3)}
-    @article = Article.create!({title: self.title, text: result, description: result.truncate_words(20), city_id: 1, site_id:self.site_id, url: self.title.parameterize })
+  validate :text_xor_stext
+
+  enum wheretext: [:new_text]
+  def create_articles
+    City.all.each do |c|
+      # result = self.text.gsub(/\{\[(.*?)\](\[(.*?)\])*\}/){random_word($1, $3)}
+      result = self.stext.present? ? self.stext.gsub(/\{(.*?)\}/){random_new_word($1)} : self.newtext = self.text.gsub(/\{\[(.*?)\](\[(.*?)\])*\}/){random_word($1, $3)}
+      @article = Article.create!({title: self.title, text: result, description: result.truncate_words(20), city_id: c.id, site_id:self.site_id, url: self.title.parameterize })
+    end
+    # result = self.stext.present? ? self.stext.gsub(/\{(.*?)\}/){random_new_word($1)} : self.newtext = self.text.gsub(/\{\[(.*?)\](\[(.*?)\])*\}/){random_word($1, $3)}
+    # result = text.gsub(/\{\[(.*?)\](\[(.*?)\])*\}/){random_word($1, $3)}
+    # @article = Article.create!({title: self.title, text: result, description: result.truncate_words(20), city_id: 1, site_id:self.site_id, url: self.title.parameterize })
+  end
+
+
+
+  def generate_new_text
+    if wheretext == 'new_text'
+      self.newtext = ''
+      if self.stext.present?
+        self.newtext = self.stext.gsub(/\{(.*?)\}/){random_new_word($1)}
+      else
+        self.newtext = self.text.gsub(/\{\[(.*?)\](\[(.*?)\])*\}/){random_word($1, $3)}
+      end
+    end
+  end
+  def random_new_word(w)
+    arr = w.split('|')
+    arr.sample
   end
 
   def random_word(word, mod)
@@ -67,20 +93,6 @@ class Randomizator < ActiveRecord::Base
     when /(Д)/
       # word = RussianInflect.inflect(word, :dative)
       word = word.to_case :dative
-        # when /(В)/
-        #    w = text.plural('В')
-        # when /(Т)/
-        #   w = text.plural('Т')
-        # when /(П)/
-        #    w = text.plural('П')
-        # when /(П_о)/
-        #    w = text.plural('П_о')
-        # when /(где)/
-        #    w = text.plural('где')
-        # when /(когда)/
-        #    w = text.plural('когда')
-        #     when /(откуда)/
-        #    w = text.plural('откуда')
         word
       end
 end
@@ -137,4 +149,12 @@ end
     end
     w
 end
+
+  private
+    def text_xor_stext
+      if !(text.blank? ^ stext.blank?)
+        errors[:base] << "Заполните обязательно только одно из полей с текстами для преобразования"
+      end
+    end
+
 end
